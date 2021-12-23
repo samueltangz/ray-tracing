@@ -9,7 +9,7 @@ func SolveQuadratic(a, b, c float64) []float64 {
 	if discriminant < 0 {
 		return []float64{}
 	}
-	if discriminant == 0 {
+	if discriminant <= EPSILON {
 		return []float64{
 			-b / (2 * a),
 		}

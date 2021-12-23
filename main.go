@@ -115,13 +115,12 @@ func (s *Screen) Render(filename string) error {
 	fmt.Fprintf(f, "%d %d\n", s.width, s.height)
 	fmt.Fprintf(f, "255\n")
 
-	antiAliasingFactor := 32
+	antiAliasingFactor := 256
 
 	for y := s.height - 1; y >= 0; y-- {
 		for x := int64(0); x < s.width; x++ {
 			c := []float64{0.0, 0.0, 0.0}
 			for i := 0; i < antiAliasingFactor; i++ {
-				// TODO: anti-aliasing (scale up the above factor, too)
 				dx := rand.Float64() * 0.5
 				dy := rand.Float64() * 0.5
 
@@ -151,8 +150,27 @@ func (s *Screen) Render(filename string) error {
 
 func main() {
 	objects := []Object{
-		Object{NewShape2(NewVector(0.4, -0.3, 0.1), 1), Metal{}, NewColor(0.3986, 0.3790, 0.3368)},
-		Object{Sphere{NewVector(0.0, -100.5, -1.0), 100.0}, Lambertian{}, NewColor(0.5320, 0.3014, 0.1507)},
+
+		Object{
+			Sphere{NewVector(0.0, 0.0, -3.0), 1.7},
+			Lambertian{},
+			NewColor(0.9, 0.9, 0.9),
+		},
+		Object{
+			Sphere{NewVector(0.0, 3.0, -3.0), 1.5},
+			Lambertian{},
+			NewColor(0.9, 0.9, 0.9),
+		},
+
+		Object{
+			NewTriangle(
+				NewVector(-100.0, -1.0, 1.0),
+				NewVector(100.0, -1.0, 1.0),
+				NewVector(0.0, -1.0, -100.0),
+			),
+			Lambertian{},
+			NewColor(0.9, 0.9, 0.9),
+		},
 	}
 
 	screen := NewScreen(

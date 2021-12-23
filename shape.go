@@ -24,9 +24,13 @@ type Sphere struct {
 func (s Sphere) Hit(r Ray) (bool, float64) {
 	oc := Sub(r.origin, s.center)
 
-	a := r.direction.NormSquared()
-	b := 2.0 * Dot(oc, r.direction)
-	c := oc.NormSquared() - math.Pow(s.radius, 2)
+	// a := r.direction.NormSquared()
+	// b := 2.0 * Dot(oc, r.direction)
+	// c := oc.NormSquared() - math.Pow(s.radius, 2)
+
+	a := ReduceSum(Mul(r.direction, r.direction))
+	b := ReduceSum(ScalarMul(2.0, Mul(r.direction, oc)))
+	c := ReduceSum(Mul(oc, oc)) - math.Pow(s.radius, 2)
 
 	roots := SolveQuadratic(a, b, c)
 	if len(roots) > 0 && roots[0] > EPSILON {
