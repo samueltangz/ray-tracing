@@ -120,7 +120,7 @@ func (s Ellipsoid) UnitNormal(v Vector) Vector {
 	return InverseTransform(Div(Transform(Sub(v, s.center), s.basis), s.l2), s.basis).Unit()
 }
 
-// Unknown Shape
+// Unknown Shape (From hxp ctf)
 
 type Shape1 struct {
 	x Vector
@@ -146,4 +146,33 @@ func (s Shape1) Hit(r Ray) (bool, float64) {
 
 func (s Shape1) UnitNormal(v Vector) Vector {
 	return Sub(v, s.x).Unit()
+}
+
+// Unknown Shape 2 (From hxp ctf)
+
+type Shape2 struct {
+	x Vector
+	y float64
+}
+
+func NewShape2(x Vector, y float64) Shape2 {
+	return Shape2{x, y}
+}
+
+func (s Shape2) Hit(r Ray) (bool, float64) {
+	y1 := r.origin
+	y2 := Dot(s.x.Unit(), r.direction)
+
+	if y2 >= -EPSILON {
+		return false, 0.0
+	}
+	q := (Dot(s.x.Unit(), y1) + s.y) / -y2
+	if q < 0 {
+		return false, 0.0
+	}
+	return true, q
+}
+
+func (s Shape2) UnitNormal(v Vector) Vector {
+	return v.Unit()
 }
