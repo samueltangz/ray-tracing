@@ -75,3 +75,75 @@ func (s Triangle) Hit(r Ray) (bool, float64) {
 func (s Triangle) UnitNormal(v Vector) Vector {
 	return Cross(s.dv1, s.dv2).Unit()
 }
+
+// Ellipsoid
+
+type Ellipsoid struct {
+	center Vector
+	basis  [3]Vector
+	l2     Vector
+}
+
+func NewEllipsoid(center, u1, u2 Vector, lengths [3]float64) Ellipsoid {
+	return Ellipsoid{
+		center: center,
+		basis: [3]Vector{
+			u1.Unit(),
+			u2.Unit(),
+			Cross(u1, u2).Unit(),
+		},
+		l2: NewVector(
+			math.Pow(lengths[0], 2),
+			math.Pow(lengths[1], 2),
+			math.Pow(lengths[2], 2),
+		),
+	}
+}
+
+func (s Ellipsoid) Hit(r Ray) (bool, float64) {
+	oc := Sub(r.origin, s.center)
+
+	a := ReduceSum(Div(Mul(r.direction, r.direction), s.l2))
+	b := ReduceSum(Div(ScalarMul(2.0, Mul(r.direction, oc)), s.l2))
+	c := ReduceSum(Div(Mul(oc, oc), s.l2)) - 1
+
+	roots := SolveQuadratic(a, b, c)
+	if len(roots) > 0 && roots[0] > EPSILON {
+		return true, roots[0]
+	} else if len(roots) > 1 && roots[1] > EPSILON {
+		return true, roots[1]
+	}
+	return false, 0.0
+}
+
+func (s Ellipsoid) UnitNormal(v Vector) Vector {
+	return InverseTransform(Div(Transform(Sub(v, s.center), s.basis), s.l2), s.basis).Unit()
+}
+
+// Unknown Shape
+
+type Shape1 struct {
+	x Vector
+	r float64
+}
+
+func (s Shape1) blood(y Vector, _s float64) (bool, float64) {
+	u := math.Pow(s.r, 2) + math.Pow(_s, 2) - y.NormSquared()
+	if u < 0 {
+		return false, 0.0
+	}
+	v := _s - math.Sqrt(u)
+	if v < 0 {
+		return false, 0.0
+	}
+	return true, v
+}
+
+func (s Shape1) Hit(r Ray) (bool, float64) {
+	q := Sub(s.x, r.origin)
+	return s.blood(q, Dot(q, r.direction))
+}
+
+func (s Shape1) UnitNormal(v Vector) Vector {
+	return Sub(v, s.x).Unit()
+}

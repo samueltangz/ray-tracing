@@ -90,3 +90,7 @@ func RandomVector(n float64) Vector {
 func Reflect(v Vector, n Vector) Vector {
 	return Sub(v, ScalarMul(2*Dot(v, n), n))
 }
+
+func ReduceSum(v Vector) float64 {
+	return v.x + v.y + v.z
+}

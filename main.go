@@ -115,7 +115,7 @@ func (s *Screen) Render(filename string) error {
 	fmt.Fprintf(f, "%d %d\n", s.width, s.height)
 	fmt.Fprintf(f, "255\n")
 
-	antiAliasingFactor := 1024
+	antiAliasingFactor := 2
 
 	for y := s.height - 1; y >= 0; y-- {
 		for x := int64(0); x < s.width; x++ {
@@ -151,70 +151,16 @@ func (s *Screen) Render(filename string) error {
 
 func main() {
 	objects := []Object{
-		Object{ // center triangle
-			NewTriangle(
-				NewVector(-1.0, 0.0, -2.0),
-				NewVector(1.0, 0.0, -2.0),
-				NewVector(0.0, 2.0, -1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
-		Object{ // right triangle
-			NewTriangle(
-				NewVector(1.0, 0.0, -2.0),
-				NewVector(2.0, 0.0, -1.0),
-				NewVector(0.0, 2.0, -1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
-		Object{ // left triangle
-			NewTriangle(
-				NewVector(-2.0, 0.0, -1.0),
-				NewVector(-1.0, 0.0, -2.0),
-				NewVector(0.0, 2.0, -1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
-		Object{Sphere{NewVector(0.0, 0.0, -1.0), 0.5}, Metal{}, NewColor(0.3986, 0.3790, 0.3368)},
 		Object{Sphere{NewVector(0.0, -100.5, -1.0), 100.0}, Lambertian{}, NewColor(0.5320, 0.3014, 0.1507)},
-
-		Object{ // center triangle
-			NewTriangle(
-				NewVector(1.0, 0.0, 2.0),
-				NewVector(-1.0, 0.0, 2.0),
-				NewVector(0.0, 2.0, 1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
-		Object{ // right triangle
-			NewTriangle(
-				NewVector(2.0, 0.0, 1.0),
-				NewVector(1.0, 0.0, 2.0),
-				NewVector(0.0, 2.0, 1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
-		Object{ // left triangle
-			NewTriangle(
-				NewVector(-1.0, 0.0, 2.0),
-				NewVector(-2.0, 0.0, 1.0),
-				NewVector(0.0, 2.0, 1.0),
-			),
-			Metal{},
-			NewColor(0.3986, 0.3790, 0.3368),
-		},
+		Object{Shape1{NewVector(0.0, 1.0, -1.0), 0.0}, Metal{}, NewColor(0.3986, 0.3790, 0.3368)},
+		Object{Sphere{NewVector(0.0, 0.0, -1.0), 0.5}, Metal{}, NewColor(0.3986, 0.3790, 0.3368)},
 	}
 
 	screen := NewScreen(
-		NewVector(0.0, 0.3, 0.0),
-		NewVector(-2.0, -2.0, -1.0),
-		NewVector(4.0, 0.0, 0.0),
-		NewVector(0.0, 4.0, 0.0),
+		NewVector(0.0, 0.0, 0.0),
+		NewVector(-4.0, -4.0, -1.0),
+		NewVector(8.0, 0.0, 0.0),
+		NewVector(0.0, 8.0, 0.0),
 		512,
 		512,
 		objects,
