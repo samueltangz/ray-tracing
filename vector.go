@@ -61,25 +61,27 @@ func Dot(v1 Vector, v2 Vector) float64 {
 
 func Cross(v1 Vector, v2 Vector) Vector {
 	return NewVector(
-		v1.y*v2.z - v1.z*v2.y,
-		v1.z*v2.x - v1.x*v2.z,
-		v1.x*v2.y - v1.y*v2.x,
+		v1.y*v2.z-v1.z*v2.y,
+		v1.z*v2.x-v1.x*v2.z,
+		v1.x*v2.y-v1.y*v2.x,
 	)
 }
 
 func Equal(v1 Vector, v2 Vector) bool {
 	// TODO: Check if there is needs to accept epsilon as error
-	return v1.x==v2.x && v1.y==v2.y && v1.z==v2.z
+	return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z
 }
 
 func RandomVector(n float64) Vector {
-	for ;; {
+	for {
 		v := NewVector(
-			2 * rand.Float64() - 1,
-			2 * rand.Float64() - 1,
-			2 * rand.Float64() - 1,
+			2*rand.Float64()-1,
+			2*rand.Float64()-1,
+			2*rand.Float64()-1,
 		)
-		if v.NormSquared() > 1 { continue }
+		if v.NormSquared() > 1 {
+			continue
+		}
 		return ScalarMul(n, v)
 	}
 }

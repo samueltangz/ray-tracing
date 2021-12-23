@@ -4,10 +4,10 @@ import (
 	"math"
 )
 
-const EPSILON float64 = 1e-8 
+const EPSILON float64 = 1e-8
 
 type Shape interface {
-	// Hit(r) finds a non-negative x such that r.origin + x*r.direction lies on the shape 
+	// Hit(r) finds a non-negative x such that r.origin + x*r.direction lies on the shape
 	Hit(Ray) (bool, float64)
 
 	// UnitNormal(v) returns a unit normal vector against the current point
@@ -44,9 +44,9 @@ func (s Sphere) UnitNormal(v Vector) Vector {
 // Triangle
 
 type Triangle struct {
-	v0	Vector
-	dv1	Vector	
-	dv2	Vector	
+	v0  Vector
+	dv1 Vector
+	dv2 Vector
 }
 
 func NewTriangle(v0, v1, v2 Vector) Triangle {
@@ -57,13 +57,13 @@ func NewTriangle(v0, v1, v2 Vector) Triangle {
 }
 
 func (s Triangle) Hit(r Ray) (bool, float64) {
-	ft :=  Dot(s.dv1,               Cross(r.direction,         s.dv2))
+	ft := Dot(s.dv1, Cross(r.direction, s.dv2))
 
-	dp1 := Dot(Sub(r.origin, s.v0), Cross(r.direction,         s.dv2)) / ft
-	dp2 := Dot(r.direction,         Cross(Sub(r.origin, s.v0), s.dv1)) / ft
-	dp3 := Dot(s.dv2,               Cross(Sub(r.origin, s.v0), s.dv1)) / ft
+	dp1 := Dot(Sub(r.origin, s.v0), Cross(r.direction, s.dv2)) / ft
+	dp2 := Dot(r.direction, Cross(Sub(r.origin, s.v0), s.dv1)) / ft
+	dp3 := Dot(s.dv2, Cross(Sub(r.origin, s.v0), s.dv1)) / ft
 
-	if dp1 < 0 || dp2 < 0 || dp1 > 1 || (dp1 + dp2) > 1 {
+	if dp1 < 0 || dp2 < 0 || dp1 > 1 || (dp1+dp2) > 1 {
 		return false, 0.0
 	}
 	if dp3 <= EPSILON {

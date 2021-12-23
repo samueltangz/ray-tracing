@@ -1,25 +1,22 @@
 package main
 
 import (
-	"os"
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 
 	"github.com/schollz/progressbar/v3"
 )
 
 type Screen struct {
 	origin          Vector
-
 	lowerLeftCorner Vector
-	horizontal		Vector
-	vertical		Vector
-
+	horizontal      Vector
+	vertical        Vector
 	width           int64
 	height          int64
-
-	objects			[]Object
+	objects         []Object
 }
 
 func NewScreen(origin, lowerLeftCorner, horizontal, vertical Vector, width, height int64, objects []Object) Screen {
@@ -41,9 +38,13 @@ func (s Screen) hit(r Ray) (bool, Object, float64) {
 
 	for _, object := range s.objects {
 		ok, x := object.shape.Hit(r)
-		if !ok { continue }
-		if x > minX { continue }
-		
+		if !ok {
+			continue
+		}
+		if x > minX {
+			continue
+		}
+
 		hit = true
 		minX = x
 		minXAt = object
@@ -63,7 +64,7 @@ func (s Screen) color(r Ray, depth int) []float64 {
 		v := r.At(x)
 		n := object.shape.UnitNormal(v)
 		n = object.material.Perbute(n)
-		
+
 		baseColor := object.color
 		reflectColor := s.color(NewRay(v, n), depth+1)
 
@@ -85,8 +86,12 @@ func (s Screen) color(r Ray, depth int) []float64 {
 }
 
 func clip(u float64) float64 {
-	if u < 0 { return 0.0 }
-	if u > 1 { return 1.0 }
+	if u < 0 {
+		return 0.0
+	}
+	if u > 1 {
+		return 1.0
+	}
 	return math.Sqrt(u)
 }
 
@@ -112,21 +117,21 @@ func (s *Screen) Render(filename string) error {
 
 	antiAliasingFactor := 1024
 
-	for y := s.height-1; y >= 0; y-- {
+	for y := s.height - 1; y >= 0; y-- {
 		for x := int64(0); x < s.width; x++ {
 			c := []float64{0.0, 0.0, 0.0}
 			for i := 0; i < antiAliasingFactor; i++ {
 				// TODO: anti-aliasing (scale up the above factor, too)
 				dx := rand.Float64() * 0.5
 				dy := rand.Float64() * 0.5
-				
+
 				r := NewRay(
 					s.origin,
 					Add(
 						s.lowerLeftCorner,
 						Add(
-							ScalarMul((float64(x) + dx)/float64(s.width), s.horizontal),
-							ScalarMul((float64(y) + dy)/float64(s.height), s.vertical),
+							ScalarMul((float64(x)+dx)/float64(s.width), s.horizontal),
+							ScalarMul((float64(y)+dy)/float64(s.height), s.vertical),
 						),
 					),
 				)
@@ -149,17 +154,17 @@ func main() {
 		Object{ // center triangle
 			NewTriangle(
 				NewVector(-1.0, 0.0, -2.0),
-				NewVector(1.0, 0.0,  -2.0),
-				NewVector(0.0, 2.0,  -1.0),
+				NewVector(1.0, 0.0, -2.0),
+				NewVector(0.0, 2.0, -1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
 		},
 		Object{ // right triangle
 			NewTriangle(
-				NewVector(1.0, 0.0,  -2.0),
-				NewVector(2.0, 0.0,  -1.0),
-				NewVector(0.0, 2.0,  -1.0),
+				NewVector(1.0, 0.0, -2.0),
+				NewVector(2.0, 0.0, -1.0),
+				NewVector(0.0, 2.0, -1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
@@ -168,28 +173,28 @@ func main() {
 			NewTriangle(
 				NewVector(-2.0, 0.0, -1.0),
 				NewVector(-1.0, 0.0, -2.0),
-				NewVector(0.0, 2.0,  -1.0),
+				NewVector(0.0, 2.0, -1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
 		},
-		Object{Sphere{NewVector(0.0, 0.0, -1.0),    0.5  }, Metal{},      NewColor(0.3986, 0.3790, 0.3368)},
+		Object{Sphere{NewVector(0.0, 0.0, -1.0), 0.5}, Metal{}, NewColor(0.3986, 0.3790, 0.3368)},
 		Object{Sphere{NewVector(0.0, -100.5, -1.0), 100.0}, Lambertian{}, NewColor(0.5320, 0.3014, 0.1507)},
 
 		Object{ // center triangle
 			NewTriangle(
-				NewVector(1.0, 0.0,  2.0),
+				NewVector(1.0, 0.0, 2.0),
 				NewVector(-1.0, 0.0, 2.0),
-				NewVector(0.0, 2.0,  1.0),
+				NewVector(0.0, 2.0, 1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
 		},
 		Object{ // right triangle
 			NewTriangle(
-				NewVector(2.0, 0.0,  1.0),
-				NewVector(1.0, 0.0,  2.0),
-				NewVector(0.0, 2.0,  1.0),
+				NewVector(2.0, 0.0, 1.0),
+				NewVector(1.0, 0.0, 2.0),
+				NewVector(0.0, 2.0, 1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
@@ -198,13 +203,12 @@ func main() {
 			NewTriangle(
 				NewVector(-1.0, 0.0, 2.0),
 				NewVector(-2.0, 0.0, 1.0),
-				NewVector(0.0, 2.0,  1.0),
+				NewVector(0.0, 2.0, 1.0),
 			),
 			Metal{},
 			NewColor(0.3986, 0.3790, 0.3368),
 		},
 	}
-
 
 	screen := NewScreen(
 		NewVector(0.0, 0.3, 0.0),

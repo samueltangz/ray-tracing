@@ -17,3 +17,6 @@ go test ./...
 ### Six triangles and a sphere (Metalic)
 
 ![](./demo/six-triangles-and-a-sphere.png)
+
+- Time spent to render: 3 minutes
+- Anti-aliasing level: 1024

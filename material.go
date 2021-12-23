@@ -6,17 +6,17 @@ type Material interface {
 
 // Lambertian
 
-type Lambertian struct {}
+type Lambertian struct{}
 
 func (m Lambertian) Perbute(v Vector) Vector {
 	p := RandomVector(0.5)
 	return Add(v, p)
-}	
+}
 
 // Metal
 
-type Metal struct {}
+type Metal struct{}
 
 func (m Metal) Perbute(v Vector) Vector {
 	return v
-}	
+}
