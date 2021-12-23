@@ -16,4 +16,4 @@ go test ./...
 
 ### Six triangles and a sphere (Metalic)
 
-![](./demo/six-triangles-and-a-sphere.ppm)
+![](./demo/six-triangles-and-a-sphere.png)
