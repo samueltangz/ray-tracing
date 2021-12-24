@@ -124,46 +124,18 @@ func (s Ellipsoid) UnitNormal(v Vector) Vector {
 	return InverseTransform(Div(Transform(Sub(v, s.center), s.basis), s.l2), s.basis).Unit()
 }
 
-// Unknown Shape (From hxp ctf)
+// Plane
 
-type Shape1 struct {
-	x Vector
-	r float64
-}
-
-func (s Shape1) blood(y Vector, _s float64) (bool, float64) {
-	u := math.Pow(s.r, 2) + math.Pow(_s, 2) - y.NormSquared()
-	if u < 0 {
-		return false, 0.0
-	}
-	v := _s - math.Sqrt(u)
-	if v < 0 {
-		return false, 0.0
-	}
-	return true, v
-}
-
-func (s Shape1) Hit(r Ray) (bool, float64) {
-	q := Sub(s.x, r.origin)
-	return s.blood(q, Dot(q, r.direction))
-}
-
-func (s Shape1) UnitNormal(v Vector) Vector {
-	return Sub(v, s.x).Unit()
-}
-
-// Unknown Shape 2 (From hxp ctf)
-
-type Shape2 struct {
+type Plane struct {
 	x Vector
 	y float64
 }
 
-func NewShape2(x Vector, y float64) Shape2 {
-	return Shape2{x, y}
+func NewPlane(x Vector, y float64) Plane {
+	return Plane{x, y}
 }
 
-func (s Shape2) Hit(r Ray) (bool, float64) {
+func (s Plane) Hit(r Ray) (bool, float64) {
 	y1 := r.origin
 	y2 := Dot(s.x.Unit(), r.direction)
 
@@ -177,6 +149,6 @@ func (s Shape2) Hit(r Ray) (bool, float64) {
 	return true, q
 }
 
-func (s Shape2) UnitNormal(v Vector) Vector {
-	return v.Unit()
+func (s Plane) UnitNormal(v Vector) Vector {
+	return s.x.Unit()
 }

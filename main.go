@@ -115,7 +115,7 @@ func (s *Screen) Render(filename string) error {
 	fmt.Fprintf(f, "%d %d\n", s.width, s.height)
 	fmt.Fprintf(f, "255\n")
 
-	antiAliasingFactor := 256
+	antiAliasingFactor := 64
 
 	for y := s.height - 1; y >= 0; y-- {
 		for x := int64(0); x < s.width; x++ {
@@ -132,7 +132,7 @@ func (s *Screen) Render(filename string) error {
 							ScalarMul((float64(x)+dx)/float64(s.width), s.horizontal),
 							ScalarMul((float64(y)+dy)/float64(s.height), s.vertical),
 						),
-					),
+					).Unit(),
 				)
 				dc := s.color(r, 0)
 				for j := 0; j < 3; j++ {
@@ -151,30 +151,50 @@ func (s *Screen) Render(filename string) error {
 func main() {
 	objects := []Object{
 
+		// Object{
+		// 	Sphere{NewVector(0.0, -100, 7.0), 100},
+		// 	Lambertian{},
+		// 	NewColor(1.0, 0.0, 0.0),
+		// },
+
 		Object{
-			Sphere{NewVector(0.0, 0.0, -3.0), 1.7},
-			Lambertian{},
-			NewColor(0.9, 0.9, 0.9),
-		},
-		Object{
-			Sphere{NewVector(0.0, 3.0, -3.0), 1.5},
-			Lambertian{},
-			NewColor(0.9, 0.9, 0.9),
+			Sphere{NewVector(2.0, 0.0, 7.0), 1},
+			Metal{},
+			NewColor(1.0, 0.0, 0.0),
 		},
 
 		Object{
-			NewTriangle(
-				NewVector(-100.0, -1.0, 1.0),
-				NewVector(100.0, -1.0, 1.0),
-				NewVector(0.0, -1.0, -100.0),
-			),
-			Lambertian{},
-			NewColor(0.9, 0.9, 0.9),
+			// x^2 + (y-1)^2 + (z-7)^2 = 1^2
+			Sphere{NewVector(0.0, 0.3, 8.0), 1},
+			Metal{},
+			NewColor(0.0, 1.0, 0.0),
 		},
+
+		Object{
+			Sphere{NewVector(-2.0, 0.0, 7.0), 1},
+			Metal{},
+			NewColor(0.0, 0.0, 1.0),
+		},
+
+		Object{
+			// y + 1 = 0
+			Plane{NewVector(0.0, 1.0, 0.0), 1.0},
+			Lambertian{},
+			NewColor(0.8, 0.8, 0.8),
+		},
+
+		// Object{
+		// 	Shape1{
+		// 		NewVector(0.0, 3.0, 7.0),
+		// 		1.5,
+		// 	},
+		// 	Lambertian{},
+		// 	NewColor(0.9, 0.9, 0.9),
+		// },
 	}
 
 	screen := NewScreen(
-		NewVector(0.0, 0.0, 0.0),
+		NewVector(0.0, 0.0, 10.0),
 		NewVector(-4.0, -4.0, -1.0),
 		NewVector(8.0, 0.0, 0.0),
 		NewVector(0.0, 8.0, 0.0),
