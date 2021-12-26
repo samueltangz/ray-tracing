@@ -19,7 +19,19 @@ type Screen struct {
 	objects         []Object
 }
 
-func NewScreen(origin, lowerLeftCorner, horizontal, vertical Vector, width, height int64, objects []Object) Screen {
+func NewScreen(lookFrom, lookAt, vup Vector, viewportWidth, viewportHeight float64, width, height int64, objects []Object) Screen {
+	w := Sub(lookFrom, lookAt).Unit()
+	u := Cross(vup, w)
+	v := Cross(w, u)
+
+	origin := lookFrom
+	horizontal := ScalarMul(viewportWidth, u)
+	vertical := ScalarMul(viewportHeight, v)
+
+	lowerLeftCorner := Sub(origin, ScalarMul(0.5, horizontal))
+	lowerLeftCorner  = Sub(lowerLeftCorner, ScalarMul(0.5, vertical))
+	lowerLeftCorner  = Sub(lowerLeftCorner, w)
+
 	return Screen{
 		origin:          origin,
 		lowerLeftCorner: lowerLeftCorner,
@@ -53,10 +65,10 @@ func (s Screen) hit(r Ray) (bool, Object, float64) {
 	return hit, minXAt, minX
 }
 
-func (s Screen) color(r Ray, depth int) []float64 {
+func (s Screen) color(r Ray, depth int) [3]float64 {
 	// too insignificant... let's skip it
-	if depth >= 16 {
-		return []float64{0, 0, 0}
+	if depth >= 64 {
+		return [3]float64{0, 0, 0}
 	}
 
 	ok, object, x := s.hit(r)
@@ -68,7 +80,7 @@ func (s Screen) color(r Ray, depth int) []float64 {
 		baseColor := object.color
 		reflectColor := s.color(NewRay(v, n), depth+1)
 
-		return []float64{
+		return [3]float64{
 			baseColor.r * reflectColor[0],
 			baseColor.g * reflectColor[1],
 			baseColor.b * reflectColor[2],
@@ -78,7 +90,7 @@ func (s Screen) color(r Ray, depth int) []float64 {
 	// Not hitting anything - show them the background.
 
 	t := 0.5 * (r.direction.Unit().y + 1.0)
-	return []float64{
+	return [3]float64{
 		1.0 - 0.5*t,
 		1.0 - 0.3*t,
 		1.0,
@@ -95,7 +107,7 @@ func clip(u float64) float64 {
 	return math.Sqrt(u)
 }
 
-func RGB(u []float64) []int {
+func RGB(u [3]float64) []int {
 	return []int{
 		int(255 * clip(u[0])),
 		int(255 * clip(u[1])),
@@ -103,7 +115,7 @@ func RGB(u []float64) []int {
 	}
 }
 
-func (s *Screen) Render(filename string) error {
+func (s *Screen) Render(filename string, antiAliasingFactor int) error {
 	bar := progressbar.Default(s.width * s.height)
 
 	f, err := os.Create(filename)
@@ -115,23 +127,24 @@ func (s *Screen) Render(filename string) error {
 	fmt.Fprintf(f, "%d %d\n", s.width, s.height)
 	fmt.Fprintf(f, "255\n")
 
-	antiAliasingFactor := 64
-
 	for y := s.height - 1; y >= 0; y-- {
 		for x := int64(0); x < s.width; x++ {
-			c := []float64{0.0, 0.0, 0.0}
+			c := [3]float64{0.0, 0.0, 0.0}
 			for i := 0; i < antiAliasingFactor; i++ {
 				dx := rand.Float64() * 0.5
 				dy := rand.Float64() * 0.5
 
 				r := NewRay(
 					s.origin,
-					Add(
-						s.lowerLeftCorner,
+					Sub(
 						Add(
-							ScalarMul((float64(x)+dx)/float64(s.width), s.horizontal),
-							ScalarMul((float64(y)+dy)/float64(s.height), s.vertical),
+							s.lowerLeftCorner,
+							Add(
+								ScalarMul((float64(x)+dx)/float64(s.width), s.horizontal),
+								ScalarMul((float64(y)+dy)/float64(s.height), s.vertical),
+							),
 						),
+						s.origin,
 					).Unit(),
 				)
 				dc := s.color(r, 0)
@@ -150,58 +163,92 @@ func (s *Screen) Render(filename string) error {
 
 func main() {
 	objects := []Object{
-
-		// Object{
-		// 	Sphere{NewVector(0.0, -100, 7.0), 100},
-		// 	Lambertian{},
-		// 	NewColor(1.0, 0.0, 0.0),
-		// },
-
 		Object{
-			Sphere{NewVector(2.0, 0.0, 7.0), 1},
+			// r
+			Sphere{NewVector(2.0, 3.7, 0.0), 1},
 			Metal{},
-			NewColor(1.0, 0.0, 0.0),
+			NewColor(1.0, 0.5, 0.5),
 		},
 
 		Object{
-			// x^2 + (y-1)^2 + (z-7)^2 = 1^2
-			Sphere{NewVector(0.0, 0.3, 8.0), 1},
+			// g
+			Sphere{NewVector(0.0, 1.9, 1.0), 1},
 			Metal{},
-			NewColor(0.0, 1.0, 0.0),
+			NewColor(0.5, 1.0, 0.5),
 		},
 
 		Object{
-			Sphere{NewVector(-2.0, 0.0, 7.0), 1},
+			// b
+			Sphere{NewVector(-2.0, 5.0, 0.0), 1},
 			Metal{},
-			NewColor(0.0, 0.0, 1.0),
+			NewColor(0.5, 0.5, 1.0),
 		},
 
 		Object{
-			// y + 1 = 0
-			Plane{NewVector(0.0, 1.0, 0.0), 1.0},
+			// y = 0
+			Plane{NewVector(0.0, 1.0, 0.0), 0.0},
 			Lambertian{},
 			NewColor(0.8, 0.8, 0.8),
 		},
 
-		// Object{
-		// 	Shape1{
-		// 		NewVector(0.0, 3.0, 7.0),
-		// 		1.5,
-		// 	},
-		// 	Lambertian{},
-		// 	NewColor(0.9, 0.9, 0.9),
-		// },
+		// A pair of blue triangles on the ground (pointing towards +x-axis)
+		Object{
+			NewTriangle(
+				NewVector(3.0, 0.01, +0.0),
+				NewVector(2.0, 0.01, -0.5),
+				NewVector(2.0, 0.01, +0.5),
+			),
+			Metal{},
+			NewColor(0, 0, 1),
+		},
+		Object{
+			NewTriangle(
+				NewVector(4.0, 0.01, +0.0),
+				NewVector(3.0, 0.01, -0.5),
+				NewVector(3.0, 0.01, +0.5),
+			),
+			Metal{},
+			NewColor(0, 0, 1),
+		},
+
+		// A pair of green triangles on the ground (pointing towards +z-axis)
+		Object{
+			NewTriangle(
+				NewVector(-0.5, 0.01, 2.0),
+				NewVector(+0.0, 0.01, 3.0),
+				NewVector(+0.5, 0.01, 2.0),
+			),
+			Metal{},
+			NewColor(0, 0.5, 0),
+		},
+		Object{
+			NewTriangle(
+				NewVector(-0.5, 0.01, 3.0),
+				NewVector(+0.0, 0.01, 4.0),
+				NewVector(+0.5, 0.01, 3.0),
+			),
+			Metal{},
+			NewColor(0, 0.5, 0),
+		},
 	}
 
+	lookFrom := NewVector(2.5, 1.5, 2.5)
+	lookAt := NewVector(2.0, 1.2, 2.0)
+	vup := NewVector(0, 1, 0)
+
 	screen := NewScreen(
-		NewVector(0.0, 0.0, 10.0),
-		NewVector(-4.0, -4.0, -1.0),
-		NewVector(8.0, 0.0, 0.0),
-		NewVector(0.0, 8.0, 0.0),
+		lookFrom,
+		lookAt,
+		vup,
+		6.0,
+		6.0,
 		512,
 		512,
 		objects,
 	)
 
-	fmt.Println(screen.Render("render.ppm"))
+	screen.Render(
+		fmt.Sprintf("rendered.ppm"),
+		256,
+	)
 }

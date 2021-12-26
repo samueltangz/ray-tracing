@@ -114,8 +114,8 @@ func (s Ellipsoid) Hit(r Ray) (bool, float64) {
 	roots := SolveQuadratic(a, b, c)
 	if len(roots) > 0 && roots[0] > EPSILON {
 		return true, roots[0]
-	} else if len(roots) > 1 && roots[1] > EPSILON {
-		return true, roots[1]
+	// } else if len(roots) > 1 && roots[1] > EPSILON {
+	// 	return true, roots[1]
 	}
 	return false, 0.0
 }
